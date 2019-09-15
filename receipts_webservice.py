@@ -26,19 +26,21 @@ def upload_file():
               or request.files['file'] is None \
               or request.files['file'].filename == '':
         return "ERROR: Missing parameter: 'file'\r\n", 422
+
     received_file = request.files['file']
-    if received_file and is_allowed_file(received_file.filename):
-        filename = secure_filename(received_file.filename)
-        filename_hash = hashlib.sha256(received_file.stream.read()).hexdigest()
-        ext = os.path.splitext(filename)[-1].strip(".")
-        outfile = os.path.join(app.config['UPLOAD_DIRECTORY'], \
-            f"{filename_hash}.{ext}")
-        if os.path.exists(outfile):
-            return "ERROR: File exists\r\n", 409
-        received_file.save(outfile)
-        return "Upload OK\r\n", 200
-    else:
+    if not received_file or not is_allowed_file(received_file.filename):
         return "Extension type not allowed\r\n", 415
+
+    filename = secure_filename(received_file.filename)
+    filename_hash = hashlib.sha256(received_file.stream.read()).hexdigest()
+    ext = os.path.splitext(filename)[-1].strip(".")
+    outfile = os.path.join(app.config['UPLOAD_DIRECTORY'], \
+        f"{filename_hash}.{ext}")
+    if os.path.exists(outfile):
+        return "ERROR: File exists\r\n", 409
+    received_file.save(outfile)
+
+    return "Upload OK\r\n", 200
 
 if __name__ == "__main__":
     app.debug = True
