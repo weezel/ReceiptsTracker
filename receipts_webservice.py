@@ -1,5 +1,7 @@
+import hashlib
 import os
-#import magic
+import os.path
+
 from flask import Flask, request
 from werkzeug.utils import secure_filename
 
@@ -18,16 +20,22 @@ def is_allowed_file(filename):
 @app.route('/', methods=['POST'])
 def upload_file():
     if request.method != "POST":
-        return "Only POST allowed", 405
+        return "ERROR: Only POST allowed", 405
 
     if 'file' not in request.files \
               or request.files['file'] is None \
               or request.files['file'].filename == '':
-        return "Missing parameter: 'file'\r\n", 422
+        return "ERROR: Missing parameter: 'file'\r\n", 422
     received_file = request.files['file']
     if received_file and is_allowed_file(received_file.filename):
         filename = secure_filename(received_file.filename)
-        received_file.save(os.path.join(app.config['UPLOAD_DIRECTORY'], filename))
+        filename_hash = hashlib.sha256(received_file.stream.read()).hexdigest()
+        ext = os.path.splitext(filename)[-1].strip(".")
+        outfile = os.path.join(app.config['UPLOAD_DIRECTORY'], \
+            f"{filename_hash}.{ext}")
+        if os.path.exists(outfile):
+            return "ERROR: File exists\r\n", 409
+        received_file.save(outfile)
         return "Upload OK\r\n", 200
     else:
         return "Extension type not allowed\r\n", 415
