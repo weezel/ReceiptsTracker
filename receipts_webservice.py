@@ -31,6 +31,13 @@ def upload_file():
     if not received_file or not is_allowed_file(received_file.filename):
         return "Extension type not allowed\r\n", 415
 
+    # Tags
+    if "tags" not in request.form.keys() or \
+            request.form['tags'] == "":
+        return "ERROR: Missing parameter: 'tags'\r\n", 422
+    tags = request.form['tags']
+
+    # File hash and saving
     filename = secure_filename(received_file.filename)
     filename_hash = hashlib.sha256(received_file.stream.read()).hexdigest()
     ext = os.path.splitext(filename)[-1].strip(".")
