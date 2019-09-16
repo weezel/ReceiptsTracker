@@ -1,6 +1,10 @@
 import hashlib
 import os
 import os.path
+import re
+
+from dbutils import DBUtils
+from models import Receipt
 
 from flask import Flask, request
 from werkzeug.utils import secure_filename
@@ -11,6 +15,7 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'tiff'])
 app = Flask(__name__)
 app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+db = DBUtils()
 
 
 def is_allowed_file(filename):
@@ -35,7 +40,7 @@ def upload_file():
     if "tags" not in request.form.keys() or \
             request.form['tags'] == "":
         return "ERROR: Missing parameter: 'tags'\r\n", 422
-    tags = request.form['tags']
+    tags = re.sub("\s", " ", request.form['tags'])
 
     # File hash and saving
     filename = secure_filename(received_file.filename)
@@ -46,6 +51,16 @@ def upload_file():
     if os.path.exists(outfile):
         return "ERROR: File exists\r\n", 409
     received_file.save(outfile)
+
+    # Get text from the receipt with OCR
+    # TODO
+    parsed_ocr = ""
+
+    # Save tho DB
+    receipt = Receipt(filename=outfile, \
+                      tags="|".join(tags.split(" ")), \
+                      ocr_text=parsed_ocr)
+    db.add(receipt)
 
     return "Upload OK\r\n", 200
 
