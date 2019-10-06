@@ -25,26 +25,20 @@ def is_allowed_file(filename):
     return '.' in filename \
             and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def parse_purchase_date(request):
-    # Parse purchase_date
-    if "pur_date" in request.form.keys():
-        purchase_date = request.form['pur_date']
-    elif "purchase_date" in request.form.keys():
-        purchase_date = request.form['purchase_date']
-    else:
-        purchase_date = datetime.datetime.now()
-
-    if not isinstance(purchase_date, type(datetime.datetime.now())):
-        purchase_date = purchase_date.replace(".", "-")
-        return datetime.datetime.strptime(purchase_date, "%Y-%m-%d")
-        #year, month, day = purchase_date.split("-")
-        #purchase_date = datetime.datetime.strftime(f"{year}.{month}.{day}", "%Y-%m-%d", )
-
 def parse_tags(request):
     if "tags" not in request.form.keys() or \
             request.form['tags'] == "":
         return "ERROR: Missing parameter: 'tags'\r\n", 422
     return re.sub("\s", " ", request.form['tags'])
+
+def parse_purchase_date(tags):
+    purchase_date_pat = re.compile(r"^[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}$")
+    dates = list(filter(lambda i: re.search(purchase_date_pat, i), tags.split(" ")))
+    if len(dates) > 0:
+        dates.sort()
+        return datetime.datetime.strptime(dates[0], "%Y-%m-%d")
+    now = datetime.datetime.now()
+    return datetime.datetime.strptime(now, "%Y-%m-%d")
 
 @app.route('/', methods=['POST'])
 def upload_file():
@@ -76,7 +70,8 @@ def upload_file():
     # TODO
     parsed_ocr = ""
 
-    purchased = parse_purchase_date(request)
+    # Things related to tags, must be executed after tags parsing
+    purchased = parse_purchase_date(tags)
 
     # Save to DB
     receipt = Receipt(filename=outfile, \
