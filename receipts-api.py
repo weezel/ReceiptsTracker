@@ -26,11 +26,8 @@ def is_allowed_file(filename):
     return '.' in filename \
             and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def parse_tags(request):
-    if "tags" not in request.form.keys() or \
-            request.form['tags'] == "":
-        return "ERROR: Missing parameter: 'tags'\r\n", 422
-    normalized = re.sub("\s", " ", request.form['tags'])
+def parse_tags(tags):
+    normalized = re.sub("\s", " ", tags)
     splitted = normalized.split(" ")
     return set(splitted)
 
@@ -65,7 +62,10 @@ def upload_file():
     if not received_file or not is_allowed_file(received_file.filename):
         return "Extension type not allowed\r\n", 415
 
-    tags = parse_tags(request)
+    if "tags" not in request.form.keys() or \
+            request.form['tags'] == "":
+        return "ERROR: Missing parameter: 'tags'\r\n", 422
+    tags = parse_tags(request.form['tags'])
 
     # File hash and saving
     filename = secure_filename(received_file.filename)
