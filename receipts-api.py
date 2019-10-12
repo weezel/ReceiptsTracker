@@ -2,12 +2,13 @@
 
 import datetime
 import hashlib
+from itertools import dropwhile
 import os
 import os.path
 import re
 
 from dbutils import DBUtils
-from models import Receipt
+from models import Receipt, Tag
 
 from flask import Flask, request
 from werkzeug.utils import secure_filename
@@ -29,16 +30,26 @@ def parse_tags(request):
     if "tags" not in request.form.keys() or \
             request.form['tags'] == "":
         return "ERROR: Missing parameter: 'tags'\r\n", 422
-    return re.sub("\s", " ", request.form['tags'])
+    normalized = re.sub("\s", " ", request.form['tags'])
+    splitted = normalized.split(" ")
+    return set(splitted)
 
 def parse_purchase_date(tags):
     purchase_date_pat = re.compile(r"^[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}$")
-    dates = list(filter(lambda i: re.search(purchase_date_pat, i), tags.split(" ")))
+    dates = list(filter(lambda i: re.search(purchase_date_pat, i), tags))
+
+    # Remove purchase date(s) from tags
+    [tags.remove(d) for d in dates if d in tags]
+
     if len(dates) > 0:
         dates.sort()
         return datetime.datetime.strptime(dates[0], "%Y-%m-%d")
     now = datetime.datetime.now()
     return datetime.datetime.strptime(now, "%Y-%m-%d")
+
+# TODO
+def parse_expiry_date(tags):
+    pass
 
 @app.route('/', methods=['POST'])
 def upload_file():
@@ -76,9 +87,9 @@ def upload_file():
     # Save to DB
     receipt = Receipt(filename=outfile, \
                       purchase_date=purchased, \
-                      tags="|".join(tags.split(" ")), \
                       ocr_text=parsed_ocr)
-    db.add(receipt)
+    tag_rows = [Tag(tag=i) for i in tags]
+    db.add(receipt, tag_rows)
 
     return "Upload OK\r\n", 200
 
