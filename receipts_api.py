@@ -29,7 +29,9 @@ def is_allowed_file(filename):
 def parse_tags(tags):
     normalized = re.sub("\s", " ", tags)
     splitted = normalized.split(" ")
-    return set(splitted)
+    dups_removed = list(set(splitted))
+    dups_removed.sort()
+    return dups_removed
 
 def parse_purchase_date(tags):
     purchase_date_pat = re.compile(r"^[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}$")
