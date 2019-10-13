@@ -7,11 +7,13 @@ import os
 import os.path
 import re
 
+from dateutil.relativedelta import relativedelta
+from flask import Flask, request
+from werkzeug.utils import secure_filename
+
 from dbutils import DBUtils
 from models import Receipt, Tag
 
-from flask import Flask, request
-from werkzeug.utils import secure_filename
 
 UPLOAD_DIRECTORY = "uploads"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'tiff'])
@@ -46,9 +48,23 @@ def parse_purchase_date(tags):
     now = datetime.datetime.now()
     return datetime.datetime.strptime(now, "%Y-%m-%d")
 
-# TODO
-def parse_expiry_date(tags):
-    pass
+def parse_expiry_date(start_date, tags):
+    exp_pat = re.compile(r"^[0-9]+_(day|month|year)s?$")
+    exp = list(filter(lambda i: re.search(exp_pat, i), tags))
+
+    if len(exp) > 0:
+        exp.sort()
+        expiration = exp[0]
+
+        number_val = int(re.search(r"^[0-9]+", expiration).group())
+
+        if re.search("days?$", expiration):
+            return start_date  + relativedelta(days=number_val)
+        elif re.search("months?$", expiration):
+            return start_date  + relativedelta(months=number_val)
+        elif re.search("years?$", expiration):
+            return start_date  + relativedelta(years=number_val)
+    return None
 
 @app.route('/', methods=['POST'])
 def upload_file():
