@@ -12,6 +12,7 @@ Base = declarative_base()
 
 receipt_to_tag_association = Table("receipt_to_tag_association",
         Base.metadata,
+        Column("id", sqlInteger, primary_key=True),
         Column("receipt_id", sqlInteger, ForeignKey("receipt.id")),
         Column("tag_id", sqlInteger, ForeignKey("tag.id")))
 
