@@ -49,8 +49,14 @@ def parse_purchase_date(tags):
     return datetime.datetime.strptime(now, "%Y-%m-%d")
 
 def parse_expiry_date(start_date, tags):
+    """
+    Parse expiry date from tags starting from start_date.
+    """
     exp_pat = re.compile(r"^[0-9]+_(day|month|year)s?$")
     exp = list(filter(lambda i: re.search(exp_pat, i), tags))
+
+    # Remove expiration date(s) from tags
+    [tags.remove(e) for e in exp if e in tags]
 
     if len(exp) > 0:
         exp.sort()
@@ -100,11 +106,13 @@ def upload_file():
     parsed_ocr = ""
 
     # Things related to tags, must be executed after tags parsing
-    purchased = parse_purchase_date(tags)
+    purchase_date = parse_purchase_date(tags)
+    expiry_date = parse_expiry_date(purchase_date, tags)
 
     # Save to DB
     receipt = Receipt(filename=outfile, \
-                      purchase_date=purchased, \
+                      purchase_date=purchase_date, \
+                      expiry_date=expiry_date, \
                       ocr_text=parsed_ocr)
     tag_rows = [Tag(tag=i) for i in tags]
     db.add(receipt, tag_rows)

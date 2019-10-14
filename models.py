@@ -19,8 +19,9 @@ class Receipt(Base):
     __tablename__ = "receipt"
     id = Column(sqlInteger, primary_key=True)
     filename = Column(sqlString, unique=True, nullable=False)
-    purchase_date = Column(sqlDate)
-    ocr_text = Column(sqlString)
+    purchase_date = Column(sqlDate, nullable=True)
+    expiry_date = Column(sqlDate, nullable=True)
+    ocr_text = Column(sqlString, nullable=True)
     tag = relationship("Tag", secondary=receipt_to_tag_association)
 
     def __repr__(self):
