@@ -5,3 +5,5 @@ bin/
 lib/
 lib64
 uploads/
+receipts.db
+receiptsapi.log

@@ -2,7 +2,7 @@
 
 import datetime
 import hashlib
-from itertools import dropwhile
+import logging
 import os
 import os.path
 import re
@@ -11,17 +11,21 @@ from dateutil.relativedelta import relativedelta
 from flask import Flask, request
 from werkzeug.utils import secure_filename
 
-from dbutils import DBUtils
-from models import Receipt, Tag
-
+import db.dbengine as dbengine
 
 UPLOAD_DIRECTORY = "uploads"
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'tiff'])
+ALLOWED_EXTENSIONS = set(['gif', 'jpg', 'jpeg', 'png', 'tiff'])
 
 app = Flask(__name__)
 app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-db = DBUtils()
+
+dbeng = dbengine.DbEngine(logging)
+
+logger = logging.basicConfig(filename="receiptsapi.log", \
+                             datefmt="%Y-%m-%d %H:%M:%S", \
+                             format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
+                             level=logging.INFO)
 
 
 def is_allowed_file(filename):
@@ -45,8 +49,7 @@ def parse_purchase_date(tags):
     if len(dates) > 0:
         dates.sort()
         return datetime.datetime.strptime(dates[0], "%Y-%m-%d")
-    now = datetime.datetime.now()
-    return datetime.datetime.strptime(now, "%Y-%m-%d")
+    return datetime.datetime.now().strftime("%Y-%m-%d")
 
 def parse_expiry_date(start_date, tags):
     """
@@ -93,13 +96,15 @@ def upload_file():
 
     # File hash and saving
     filename = secure_filename(received_file.filename)
-    filename_hash = hashlib.sha256(received_file.stream.read()).hexdigest()
+    file_binary = received_file.stream.read()
+    filename_hash = hashlib.sha256(file_binary).hexdigest()
     ext = os.path.splitext(filename)[-1].strip(".")
     outfile = os.path.join(app.config['UPLOAD_DIRECTORY'], \
         f"{filename_hash}.{ext}")
     if os.path.exists(outfile):
         return "ERROR: File exists\r\n", 409
-    received_file.save(outfile)
+    with open(outfile, "wb") as f:
+        f.write(file_binary)
 
     # Get text from the receipt with OCR
     # TODO
@@ -110,12 +115,16 @@ def upload_file():
     expiry_date = parse_expiry_date(purchase_date, tags)
 
     # Save to DB
-    receipt = Receipt(filename=outfile, \
-                      purchase_date=purchase_date, \
-                      expiry_date=expiry_date, \
-                      ocr_text=parsed_ocr)
-    tag_rows = [Tag(tag=i) for i in tags]
-    db.add(receipt, tag_rows)
+    receipt = {"filename": outfile, \
+               "purchase_date": purchase_date, \
+               "expiry_date": expiry_date, \
+               "ocr_text": parsed_ocr}
+    receipt_id = dbeng.insert_receipt(receipt)
+    if receipt_id == -1:
+        logging.error(f"Returned receipt ID was wrong: {receipt_id}")
+        return "ERROR: terror\n", 503 # XXX
+    dbeng.insert_tags(tags)
+    dbeng.insert_receipt_tags_association(receipt_id, tags)
 
     return "Upload OK\r\n", 200
 
