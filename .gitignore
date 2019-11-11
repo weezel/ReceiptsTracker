@@ -1,9 +1,12 @@
 *.db
+*.jpeg
+*.jpg
+*.png
 __init__.py
 __pycache__/
 bin/
 lib/
 lib64
-uploads/
 receipts.db
 receiptsapi.log
+uploads/
