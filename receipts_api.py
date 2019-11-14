@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import datetime
 import hashlib
 import logging
@@ -21,11 +22,6 @@ app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 dbeng = dbengine.DbEngine(logging)
-
-logger = logging.basicConfig(filename="receiptsapi.log", \
-                             datefmt="%Y-%m-%d %H:%M:%S", \
-                             format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
-                             level=logging.INFO)
 
 
 def is_allowed_file(filename):
@@ -129,6 +125,21 @@ def upload_file():
     return "Upload OK\r\n", 200
 
 if __name__ == "__main__":
-    app.debug = True
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", help="Debug mode", action="store_true")
+    args = parser.parse_args()
+
+    if args.d:
+        app.debug = True
+        logger = logging.basicConfig(
+             datefmt="%Y-%m-%d %H:%M:%S", \
+             format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
+             level=logging.INFO)
+    else:
+        logger = logging.basicConfig(filename="receiptsapi.log", \
+             datefmt="%Y-%m-%d %H:%M:%S", \
+             format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
+             level=logging.INFO)
+
     app.run(host='127.0.0.1', port=5555)
 
