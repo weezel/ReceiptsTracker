@@ -125,9 +125,9 @@ def upload_file():
     return "Upload OK\r\n", 200
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-d", help="Debug mode", action="store_true")
-    args = parser.parse_args()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("-d", help="Debug mode", action="store_true")
+    args = argparser.parse_args()
 
     if args.d:
         app.debug = True
