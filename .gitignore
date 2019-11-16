@@ -8,6 +8,7 @@ bin/
 lib/
 lib64
 pyvenv.cfg
+receipts.cfg
 receipts.db
 receiptsapi.log
 uploads/
