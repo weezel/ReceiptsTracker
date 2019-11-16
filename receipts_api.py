@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import configparser
 import datetime
 import hashlib
 import logging
@@ -20,9 +21,6 @@ ALLOWED_EXTENSIONS = set(['gif', 'jpg', 'jpeg', 'png', 'tiff'])
 app = Flask(__name__)
 app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-dbeng = dbengine.DbEngine(logging)
-
 
 def is_allowed_file(filename):
     return '.' in filename \
@@ -127,7 +125,14 @@ def upload_file():
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("-d", help="Debug mode", action="store_true")
+    argparser.add_argument("-c", type=str, help="Configuration file", nargs=1)
     args = argparser.parse_args()
+
+    receipts_config = configparser.ConfigParser()
+    config_location = "receipts.cfg"
+    if args.c is not None and os.path.exists(args.c[0]):
+       config_location = args.c[0]
+    receipts_config.read(config_location)
 
     if args.d:
         app.debug = True
@@ -140,6 +145,11 @@ if __name__ == "__main__":
              datefmt="%Y-%m-%d %H:%M:%S", \
              format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
              level=logging.INFO)
+
+    db_location = receipts_config['db']['database_file']
+    logging.info(f"Configured database location: {db_location}")
+
+    dbeng = dbengine.DbEngine(logging, db_location)
 
     app.run(host='127.0.0.1', port=5555)
 
