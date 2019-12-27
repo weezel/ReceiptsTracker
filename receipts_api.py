@@ -122,14 +122,15 @@ def upload_file():
 
     return "Upload OK\r\n", 200
 
-if __name__ == "__main__":
+def main(config_location: str, port: int):
+    global app
+
     argparser = argparse.ArgumentParser()
     argparser.add_argument("-d", help="Debug mode", action="store_true")
     argparser.add_argument("-c", type=str, help="Configuration file", nargs=1)
     args = argparser.parse_args()
 
     receipts_config = configparser.ConfigParser()
-    config_location = "receipts.cfg"
     if args.c is not None and os.path.exists(args.c[0]):
        config_location = args.c[0]
     receipts_config.read(config_location)
@@ -150,6 +151,9 @@ if __name__ == "__main__":
     logging.info(f"Configured database location: {db_location}")
 
     dbeng = dbengine.DbEngine(logging, db_location)
+    app.run(host='127.0.0.1', port=port)
 
-    app.run(host='127.0.0.1', port=5555)
+
+if __name__ == "__main__":
+    main(config_location="receipts.cfg", port=5555)
 
