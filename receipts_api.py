@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 from flask import Flask, request
 from werkzeug.utils import secure_filename
 
-import db.dbengine as dbengine
+from db import dbengine
 
 UPLOAD_DIRECTORY = "uploads"
 ALLOWED_EXTENSIONS = set(['gif', 'jpg', 'jpeg', 'png', 'tiff'])
@@ -21,6 +21,8 @@ ALLOWED_EXTENSIONS = set(['gif', 'jpg', 'jpeg', 'png', 'tiff'])
 app = Flask(__name__)
 app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+dbeng = None
 
 def is_allowed_file(filename):
     return '.' in filename \
@@ -124,6 +126,7 @@ def upload_file():
 
 def main(config_location: str, port: int):
     global app
+    global dbeng
 
     argparser = argparse.ArgumentParser()
     argparser.add_argument("-d", help="Debug mode", action="store_true")
