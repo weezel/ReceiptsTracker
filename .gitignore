@@ -2,7 +2,6 @@
 *.jpeg
 *.jpg
 *.png
-__init__.py
 __pycache__/
 bin/
 lib/
