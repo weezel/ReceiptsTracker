@@ -71,6 +71,12 @@ def parse_expiry_date(start_date, tags):
             return start_date  + relativedelta(years=number_val)
     return None
 
+@app.before_request
+def log_request():
+    remote_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    headers = [": ".join(i) for i in request.headers]
+    logging.info(f"Incoming connection from {remote_ip} with params: {headers}")
+
 @app.route('/', methods=['POST'])
 def upload_file():
     if request.method != "POST":
