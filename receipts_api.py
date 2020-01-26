@@ -100,7 +100,7 @@ def upload_file():
     filename = secure_filename(received_file.filename)
     file_binary = received_file.stream.read()
     filename_hash = hashlib.sha256(file_binary).hexdigest()
-    ext = os.path.splitext(filename)[-1].strip(".")
+    ext = os.path.splitext(filename)[-1].strip(".").lower()
     outfile = os.path.join(app.config['UPLOAD_DIRECTORY'], \
         f"{filename_hash}.{ext}")
     if os.path.exists(outfile):
