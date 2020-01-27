@@ -30,7 +30,7 @@ def is_allowed_file(filename):
 
 def parse_tags(tags):
     normalized = re.sub("\s", " ", tags)
-    splitted = normalized.split(" ")
+    splitted = normalized.lower().split(" ")
     dups_removed = list(set(splitted))
     dups_removed.sort()
     return dups_removed
