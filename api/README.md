@@ -4,13 +4,13 @@ An API for tracking receipts.
 
 Supports the following features:
 
-	* Tagging
+* Tagging
 
-	* Reads texts from the receipts
+* Reads texts from the receipts
 
-	* Store purchase date
+* Store purchase date
 
-	* Calculate expiration day
+* Calculate expiration day
 
 
 ## Dependencies
