@@ -1,0 +1,9 @@
+*.db
+*.jpeg
+*.jpg
+*.png
+__pycache__/
+receipts.cfg
+receipts.db
+receiptsapi.log
+uploads/

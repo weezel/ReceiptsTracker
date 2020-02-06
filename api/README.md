@@ -21,6 +21,8 @@ Supports the following features:
 
 * Dateutil
 
+* Gunicorn (if executed via nginx or such)
+
 
 ## Usage
 ### Running receipts_api.py

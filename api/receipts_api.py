@@ -144,8 +144,11 @@ def main(config_location: str, port: int):
        config_location = args.c[0]
     receipts_config.read(config_location)
 
+    db_location = receipts_config['db']['database_file']
+
     if args.d:
         app.debug = True
+        db_location = "receipts_test.db"
         logger = logging.basicConfig(
              datefmt="%Y-%m-%d %H:%M:%S", \
              format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
@@ -156,7 +159,6 @@ def main(config_location: str, port: int):
              format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
              level=logging.INFO)
 
-    db_location = receipts_config['db']['database_file']
     logging.info(f"Configured database location: {db_location}")
 
     dbeng = dbengine.DbEngine(logging, db_location)
