@@ -1,0 +1,8 @@
+[IMAP]
+loginname=receipt
+password=abc123
+imap_folder=receipts
+
+[Message]
+delete_after_n_days=30
+
