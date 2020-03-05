@@ -5,6 +5,7 @@ import email
 import hashlib
 import imaplib
 import logging
+import os
 import pytz
 import requests
 import sys
@@ -111,12 +112,18 @@ class ImapHandler(object):
                        "payload": msg_payload}
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print(f"ERROR: {sys.argv[0]}: Missing configuration filename. Must be absolute path")
+        sys.exit(1)
+
+    os.chdir(os.path.dirname(sys.argv[1]))
+
     must_have_sections = ('IMAP', 'Messages', 'Receipts_api',)
     config = configparser.ConfigParser()
-    config.read('imap_handler.ini')
+    config.read(sys.argv[1])
 
     if not all(i in config.sections() for i in must_have_sections):
-        print("{}: Error parsing config. Must have sections: {}"
+        print("ERROR: {}: Parsing config file failed. Must have sections: {}"
               .format(sys.argv[0], " ".join(must_have_sections)))
         sys.exit(1)
 
