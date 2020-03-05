@@ -136,12 +136,13 @@ def main(config_location: str, port: int):
 
     argparser = argparse.ArgumentParser()
     argparser.add_argument("-d", help="Debug mode", action="store_true")
-    argparser.add_argument("-c", type=str, help="Configuration file", nargs=1)
+    argparser.add_argument("-c", type=str, help="Configuration file (absolute path)", nargs=1)
     args = argparser.parse_args()
 
     receipts_config = configparser.ConfigParser()
     if args.c is not None and os.path.exists(args.c[0]):
-       config_location = args.c[0]
+        config_location = os.path.abspath(args.c[0])
+    os.chdir(os.path.dirname(config_location))
     receipts_config.read(config_location)
 
     db_location = receipts_config['db']['database_file']
