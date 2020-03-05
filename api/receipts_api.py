@@ -150,9 +150,9 @@ def main(config_location: str, port: int):
         app.debug = True
         db_location = "receipts_test.db"
         logger = logging.basicConfig(
-             datefmt="%Y-%m-%d %H:%M:%S", \
-             format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
-             level=logging.INFO)
+            datefmt="%Y-%m-%d %H:%M:%S", \
+            format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
+            level=logging.INFO)
     else:
         logger = logging.basicConfig(filename="receiptsapi.log", \
              datefmt="%Y-%m-%d %H:%M:%S", \
