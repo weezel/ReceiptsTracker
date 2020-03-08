@@ -1,0 +1,2 @@
+[db]
+database_file = /var/ReceiptsTracker/receipts.db
