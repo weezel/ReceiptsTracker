@@ -8,6 +8,7 @@ import logging
 import os
 import os.path
 import re
+import sys
 
 from dateutil.relativedelta import relativedelta
 from flask import Flask, request
@@ -134,6 +135,10 @@ def main(config_location: str, port: int):
     global app
     global dbeng
 
+    if len(sys.argv) < 2:
+        print(f"ERROR: {sys.argv[0]}: Missing configuration file parameter")
+        sys.exit(1)
+
     argparser = argparse.ArgumentParser()
     argparser.add_argument("-d", help="Debug mode", action="store_true")
     argparser.add_argument("-c", type=str, help="Configuration file (absolute path)", nargs=1)
@@ -150,12 +155,12 @@ def main(config_location: str, port: int):
     if args.d:
         app.debug = True
         db_location = "receipts_test.db"
-        logger = logging.basicConfig(
+        logging.basicConfig(
             datefmt="%Y-%m-%d %H:%M:%S", \
             format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
             level=logging.INFO)
     else:
-        logger = logging.basicConfig(filename="receiptsapi.log", \
+        logging.basicConfig(filename="receiptsapi.log", \
              datefmt="%Y-%m-%d %H:%M:%S", \
              format="%(asctime)s.%(msecs)03d: %(levelname)s %(message)s", \
              level=logging.INFO)
