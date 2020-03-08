@@ -18,4 +18,5 @@ Here's an example configuration file `imap_handler.ini`:
 	server_address=http://localhost:5555
 
 TODO:
-[ ] Polling (or just use cron?)
+
+	[ ] Polling (or just use cron?)
