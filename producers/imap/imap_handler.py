@@ -146,7 +146,7 @@ if __name__ == '__main__':
             logmsg = f"msgid_{int(msg['msg_uid'])}: Sending {msg['fname']} with tags '{msg['tags']}' to {receipt_api_host}"
             logging.info(logmsg)
             ret = requests.post(receipt_api_host,
-                                files={'tags': ('', msg['tags']),
+                                files={'tags': (None, msg['tags']),
                                        'file': (msg['fname'], msg['payload'])})
             if ret.ok:
                 logging.info(f"msgid_{int(msg['msg_uid'])}: Moving message to receipts/archived")
