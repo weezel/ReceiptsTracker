@@ -155,4 +155,7 @@ if __name__ == '__main__':
                 logging.info(f"msgid_{int(msg['msg_uid'])}: Completed")
             else:
                 logging.info(f"msgid_{int(msg['msg_uid'])}: [{ret.status_code}] {ret.content}")
+                imap_handler.move_message(msg["msg_uid"], "receipts/errors")
+                logging.info(f"msgid_{int(msg['msg_uid'])}: Message moved to errors")
+                logging.info(f"msgid_{int(msg['msg_uid'])}: Completed")
 
